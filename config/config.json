@@ -1,0 +1,10 @@
+{
+  "": {
+    "match": {
+      "targetNum": 1,
+      "center": "center",
+      "offset": [0, 0]
+    },
+    "jump": "xxx"
+  }
+}
