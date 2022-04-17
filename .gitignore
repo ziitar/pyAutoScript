@@ -1,1 +1,4 @@
 modules/__pycache__/
+imgs/
+modules/test.py
+config/*.json

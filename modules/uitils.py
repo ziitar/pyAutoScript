@@ -7,14 +7,21 @@ from PyQt5.QtWidgets import QApplication
 import sys
 import cv2 as cv
 import numpy as np
+import os
+
+script_dir = os.path.dirname(__file__)
+img_dir = os.path.join(script_dir, '../imgs/')
 
 
 class Utils:
-    def __init__(self, hwnd, template_method) -> None:
+    def __init__(self, hwnd, template_method, tag, filename, screen) -> None:
         super(Utils, self).__init__()
-        self.app = QApplication(sys.argv)
         self.hwnd = hwnd
         self.match_template_method = template_method
+        self.debug = False
+        self.tag = tag
+        self.filename = filename
+        self.screen = screen
 
     def background_screenshot(self, hwnd):
         """
@@ -22,8 +29,7 @@ class Utils:
         :param hwnd: 目标窗口句柄
         :return: 截图
         """
-        screen = QApplication.primaryScreen()
-        img = screen.grabWindow(hwnd).toImage()
+        img = self.screen.grabWindow(hwnd).toImage()
         img = img.convertToFormat(4)
         ptr = img.bits()
         ptr.setsize(img.byteCount())
@@ -42,24 +48,26 @@ class Utils:
             src=gray, thresh=127, maxval=255, type=cv.THRESH_TRUNC)
         return binary
 
-    def template_matching(self, sample_source, target_source, rate, num=1, ):
+    def template_matching(self, sample_source, target_source, rate, num=1):
         """
         图像匹配
         :param sample_source: 样品
         :param target_source: 待检测图片
         :return: 二值化后的图片
         """
-        sample = Utils.threshold_image(sample_source)
-        target = Utils.threshold_image(target_source)
+        sample = self.threshold_image(sample_source)
+        target = self.threshold_image(target_source)
 
         method = self.match_template_method
+
         height, width = sample.shape[:2]
         res = cv.matchTemplate(image=target, templ=sample, method=method)
         if num == 1:
             min_val, max_val, min_loc, max_loc = cv.minMaxLoc(res)
             print(
                 f"method: {method}, min_val:{min_val}, max_val: {max_val}, min_loc:{min_loc}, max_loc: {max_loc}")
-
+            left_top = None
+            right_bottom = None
             if method in [cv.TM_SQDIFF, cv.TM_SQDIFF_NORMED]:
                 if min_val <= rate:
                     left_top = min_loc
@@ -69,10 +77,14 @@ class Utils:
                     left_top = max_loc
                     right_bottom = (max_loc[0]+width, max_loc[1]+height)
 
-            # ract = cv.rectangle(target_source, left_top, right_bottom,
-            #                     (0, 0, 255), 2, cv.LINE_4)
-
-            # cv.imshow('match', ract)
+            if self.debug is True:
+                if left_top is not None and right_bottom is not None:
+                    ract = cv.rectangle(target_source, left_top, right_bottom,
+                                        (0, 0, 255), 2, cv.LINE_4)
+                    cv.imwrite(img_dir+self.filename +
+                               self.tag+'_match.jpg', ract)
+                else:
+                    print('匹配失败')
 
             if left_top is not None and right_bottom is not None:
                 return (left_top, right_bottom)
@@ -90,7 +102,8 @@ class Utils:
         :param cx: 点击x坐标
         :param cy: 点击y坐标
         """
-        print(cx, cy)
+        if self.debug is True:
+            print(cx, cy, 'do_click')
         long_position = win32api.MAKELONG(cx, cy)
         win32api.SendMessage(hwnd, win32con.WM_LBUTTONDOWN,
                              win32con.MK_LBUTTON, long_position)

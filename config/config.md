@@ -8,14 +8,15 @@
       //图像识别配置
       "match": {   
         //识别方法
-        "method": "TM_SQDIFF_NORMED",  
+        "method": "TM_SQDIFF_NORMED", 
+        //需匹配的图像url 如果为数组 则只需其中一个匹配 
         "sample": "样品url",
         //识别个数
         "targetNum": 1, 
         //相识概率
         "rate": 0.9,
         //匹配结果标识(false,true)保存到全局指定字段
-        "saveAs": "property", 
+        "saveAs": "property"
       },
       //执行判定 如果有此项 则判定后的逻辑会和match结果并起来
       "judge": { 
@@ -28,14 +29,16 @@
         //操作符 (>, <, >=, <=, =, is, in )
         "operator": ["is"], 
         //各判定之间的关系 （and 且，or 或）
-        "relation": "and", 
+        "relation": "and"
       },
       //match结果[且judge结果]为false时执行
       "reject": { 
         //失败后且重试完后跳转到哪个tag
         "jump": "example", 
+        //睡眠秒数
+        "sleep": 0,
         //如果匹配失败重试次数
-        "retry": 0,  
+        "retry": 0  
       },
       //match结果[且judge结果]为true时执行
       "resolve": {
@@ -46,7 +49,7 @@
         //成功时执行设置值操作
         "setProperty": ["property"], 
         //当为关键词 (sum,sub)，分别对应累加和累减
-        "propertyValue": [1], 
+        "propertyValue": [1] 
       },
       //点击配置
       "click": {
@@ -55,8 +58,10 @@
         //基于positionBase 再偏移 [x,y]像素
         "offset": [0, 0],
         // 基于positionBase和offset计算后的点为圆心 random为半径画圆 点击随机落在圆形区域内
-        "random": 10, 
+        "random": 10
       },
+      //暂定指定秒数之后执行next
+      "sleep": 4,
       //指定除了执行jump外正常的流程下一个tag
       "next": "tag" 
     }

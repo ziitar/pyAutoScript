@@ -1,18 +1,34 @@
 
-from typing_extensions import Self
-from modules.config import Config
-from modules.uitils import Utils
+from modules.config import Config, Item
 import time
 import win32gui
+import os
+import re
+
+script_dir = os.path.dirname(__file__)
+config_dir = os.path.join(os.path.abspath(
+    os.path.dirname(script_dir+os.path.sep+'.')), '../config/')
 
 
-class Process(Utils):
-    def __init__(self) -> None:
+class Process():
+    def __init__(self, screen) -> None:
         super(Process, self).__init__()
-        self.config = Config('../config/config.json')
+        files = os.listdir(config_dir)
+        i = 0
+        files = list(filter(lambda url: re.search(
+            '.+\.json$', url) is not None, files))
+        for file in files:
+            i += 1
+            print('{0:2d} {1:10s}'.format(i, file))
+        index = input('请输入需执行的配置文件序号:')
+        file = files[int(index) - 1]
+        self.config = Config(file)
+        self.file = file
         self.hwnd = 0
         self.program_title = ''
-        self.get_active_window(self)
+        self.get_active_window()
+        self.globalData = {}
+        self.screen = screen
 
     def get_active_window(self, loop_times=5):
         """
@@ -33,7 +49,22 @@ class Process(Utils):
 
     def start(self):
         print(f'匹配到窗口：{self.program_title},开始执行脚本')
-        item = self.config.getFirstItem()
-
-        while item.next is not None:
-            item = self.config.getItem(item.next)
+        itemConfig = self.config.getFirstItem()
+        item = Item(self.hwnd, itemConfig, self.globalData,
+                    'start', self.file, self.screen)
+        item.run()
+        if "sleep" in itemConfig is not None and isinstance(itemConfig["sleep"], int):
+            time.sleep(itemConfig["sleep"])
+        if item.next is not None:
+            while item.next is not None:
+                tag = item.next
+                itemConfig = self.config.getItem(item.next)
+                if itemConfig is not None:
+                    item = Item(self.hwnd, itemConfig,
+                                self.globalData, tag, self.file, self.screen)
+                    item.run()
+                    if "sleep" in itemConfig is not None and isinstance(itemConfig["sleep"], int):
+                        time.sleep(itemConfig["sleep"])
+                else:
+                    item.next = None
+        print('脚本执行完成')
