@@ -3,7 +3,6 @@ import os
 import random
 import time
 import cv2 as cv
-from numpy import isin
 
 from modules.uitils import Utils
 script_dir = os.path.dirname(__file__)
