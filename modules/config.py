@@ -214,7 +214,10 @@ class Item(Utils):
                     x, y = base
                     base = (x+randomx, y+randomy)
                 x, y = base
-                self.do_click(self.hwnd, x, y)
+                moveTo = None
+                if 'moveTo' in click and isinstance(click['moveTo'], list):
+                    moveTo = click['moveTo']
+                self.do_click(self.hwnd, (x, y), moveTo)
 
 
 class Config:

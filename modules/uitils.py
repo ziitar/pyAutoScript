@@ -1,4 +1,5 @@
 
+import random
 import win32api
 import win32gui
 import win32con
@@ -95,18 +96,42 @@ class Utils:
                 loc = np.where(res >= rate)
             # todo 识别多对象时
 
-    def do_click(self, hwnd, cx, cy):
+    def do_click(self, hwnd, start, moveTo):
         """
         点击操作
         :param hwnd: 程序句柄
         :param cx: 点击x坐标
         :param cy: 点击y坐标
         """
+        cx, cy = start
         if self.debug is True:
             print(cx, cy, 'do_click')
         long_position = win32api.MAKELONG(cx, cy)
         win32api.SendMessage(hwnd, win32con.WM_LBUTTONDOWN,
                              win32con.MK_LBUTTON, long_position)
-        time.sleep(0.05)
+        if moveTo is not None and isinstance(moveTo, list):
+            dx, dy = moveTo
+            rx, ry = start
+            time = random.randint(500, 1500)
+            duration = int((time/1000)*25)
+            current = 0
+            while current < duration:
+                x = self._easeInOut(current, rx, dx, duration)
+                y = self._easeInOut(current, ry, dy, duration)
+                position = win32api.MAKELONG(x, y)
+                win32api.SendMessage(
+                    hwnd, win32con.WM_MOUSEMOVE, win32con.MK_LBUTTON, position)
+                current += 40
+                time.sleep(0.04)
+            long_position = win32api.MAKELONG(dx, dy)
+        else:
+            time.sleep(0.05)
         win32api.SendMessage(hwnd, win32con.WM_LBUTTONUP,
                              win32con.MK_LBUTTON, long_position)
+
+    def _easeInOut(self, currentTime, startValue, changeValue, duration):
+        currentTime = currentTime / duration / 2
+        if currentTime < 1:
+            return changeValue / 2 * currentTime * currentTime + startValue
+        currentTime -= 1
+        return -changeValue / 2 * (currentTime * (currentTime - 2) - 1) + startValue

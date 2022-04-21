@@ -96,8 +96,8 @@ config/config.json:
 
 - [ ] match.sample支持数组
 - [ ] 当match.sample为数组是提供或、且判定
-- [ ] 支持拖动操作
-- [ ] 拖动支持ease-in-out，模拟人手动拖动
+- [x] 支持拖动操作
+- [x] 拖动支持ease-in-out，模拟人手动拖动
 - [ ] 支持键盘按键
 - [ ] 支持文本输入
 - [ ] 支持特征值图像匹配

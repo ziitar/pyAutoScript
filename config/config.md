@@ -62,7 +62,7 @@
         // 基于positionBase和offset计算后的点为圆心 random为半径画圆 点击随机落在圆形区域内
         "random": 10,
         //实现拖拽
-        "moveTo": [0,0]
+        "moveTo": [0,0],
       },
       //暂定指定秒数之后执行next
       "sleep": 4,
