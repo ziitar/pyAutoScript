@@ -1,4 +1,5 @@
 
+import random
 from modules.config import Config, Item
 import time
 import win32gui
@@ -55,6 +56,8 @@ class Process():
         item.run()
         if "sleep" in itemConfig is not None and isinstance(itemConfig["sleep"], int):
             time.sleep(itemConfig["sleep"])
+        if 'sleepRandom' in itemConfig and isinstance(itemConfig['sleepRandom'], float):
+            time.sleep(random.random(0, itemConfig['sleepRandom']))
         if item.next is not None:
             while item.next is not None:
                 tag = item.next

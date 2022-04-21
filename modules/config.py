@@ -13,7 +13,7 @@ config_dir = os.path.join(script_dir, '../config/')
 class Item(Utils):
     def __init__(self, hwnd, item_config, global_data, tag, filename, screen) -> None:
         # 默认cv.TM_SQDIFF_NORMED 效果最好
-        if item_config['match'] is not None and item_config['match']['method'] is not None:
+        if 'match' in item_config and item_config['match'] is not None and item_config['match']['method'] is not None:
             match_template_method = eval(
                 'cv.' + item_config['match']['method'])
         else:
@@ -48,77 +48,80 @@ class Item(Utils):
                 self.resolve()
             else:
                 self.reject()
-        # except TypeError:
-        #     raise
+
         except BaseException as err:
             print(f"Unexpected {err=}, {type(err)=}")
             raise
 
     def judge(self):
-        values = [self.global_data[x]
-                  for x in self.config["judge"]["getProperty"]]
-        flag = None
-        if self.config["judge"]["relation"] == 'and':
-            flag = True
-            for i in range(len(values)):
-                operator = self.config["judge"]["operator"][i]
-                match operator:
-                    case '>':
-                        flag = flag and values[i] > self.config["judge"]["judgeValue"][i]
+        judge = self.config['judge']
+        if "getProperty" in judge and 'operator' in judge and 'relation' in judge:
+            values = [self.global_data[x]
+                      for x in judge["getProperty"]]
+            flag = None
+            if judge["relation"] == 'and':
+                flag = True
+                for i in range(len(values)):
+                    operator = judge["operator"][i]
+                    match operator:
+                        case '>':
+                            flag = flag and values[i] > judge["judgeValue"][i]
 
-                    case '<':
-                        flag = flag and values[i] < self.config["judge"]["judgeValue"][i]
+                        case '<':
+                            flag = flag and values[i] < judge["judgeValue"][i]
 
-                    case '>=':
-                        flag = flag and values[i] >= self.config["judge"]["judgeValue"][i]
+                        case '>=':
+                            flag = flag and values[i] >= judge["judgeValue"][i]
 
-                    case '<=':
-                        flag = flag and values[i] <= self.config["judge"]["judgeValue"][i]
+                        case '<=':
+                            flag = flag and values[i] <= judge["judgeValue"][i]
 
-                    case '=':
-                        flag = flag and values[i] == self.config["judge"]["judgeValue"][i]
+                        case '=':
+                            flag = flag and values[i] == judge["judgeValue"][i]
 
-                    case 'is':
-                        flag = flag and values[i] is self.config["judge"]["judgeValue"][i]
+                        case 'is':
+                            flag = flag and values[i] is judge["judgeValue"][i]
 
-                    case 'in':
-                        flag = flag and values[i] in self.config["judge"]["judgeValue"][i]
+                        case 'in':
+                            flag = flag and values[i] in judge["judgeValue"][i]
 
-                    case _:
-                        flag = False
-                if flag is False:
-                    break
-        elif self.config["judge"]["relation"] == 'or':
-            flag = False
-            for i in range(len(values)):
-                operator = self.config["judge"]["operator"][i]
-                match operator:
-                    case '>':
-                        flag = flag or values[i] > self.config["judge"]["judgeValue"][i]
+                        case _:
+                            flag = False
+                    if flag is False:
+                        break
+            elif judge["relation"] == 'or':
+                flag = False
+                for i in range(len(values)):
+                    operator = judge["operator"][i]
+                    match operator:
+                        case '>':
+                            flag = flag or values[i] > judge["judgeValue"][i]
 
-                    case '<':
-                        flag = flag or values[i] < self.config["judge"]["judgeValue"][i]
+                        case '<':
+                            flag = flag or values[i] < judge["judgeValue"][i]
 
-                    case '>=':
-                        flag = flag or values[i] >= self.config["judge"]["judgeValue"][i]
+                        case '>=':
+                            flag = flag or values[i] >= judge["judgeValue"][i]
 
-                    case '<=':
-                        flag = flag or values[i] <= self.config["judge"]["judgeValue"][i]
+                        case '<=':
+                            flag = flag or values[i] <= judge["judgeValue"][i]
 
-                    case '=':
-                        flag = flag or values[i] == self.config["judge"]["judgeValue"][i]
+                        case '=':
+                            flag = flag or values[i] == judge["judgeValue"][i]
 
-                    case 'is':
-                        flag = flag or values[i] is self.config["judge"]["judgeValue"][i]
+                        case 'is':
+                            flag = flag or values[i] is judge["judgeValue"][i]
 
-                    case 'in':
-                        flag = flag or values[i] in self.config["judge"]["judgeValue"][i]
+                        case 'in':
+                            flag = flag or values[i] in judge["judgeValue"][i]
 
-                    case _:
-                        flag = False
-                if flag is True:
-                    break
-        return flag
+                        case _:
+                            flag = False
+                    if flag is True:
+                        break
+            return flag
+        print('配置错误，请输入 getProperty、operator、relation')
+        return False
 
     def match_img(self):
         if 'match' in self.config and 'sample' in self.config['match'] and self.config["match"]["sample"] is not None:
@@ -140,10 +143,13 @@ class Item(Utils):
                 return True
             else:
                 return False
+        return True
 
     def reject(self):
         if 'reject' in self.config and self.config["reject"] is not None:
             reject = self.config["reject"]
+            if 'sleepRandom' in reject and isinstance(reject['sleepRandom'], float):
+                time.sleep(random.random(0, reject['sleepRandom']))
             if 'sleep' in reject and isinstance(reject['sleep'], int):
                 time.sleep(reject['sleep'])
             if "retry" in reject and reject["retry"] is not None and self.run_num < reject["retry"]:
@@ -152,6 +158,7 @@ class Item(Utils):
                 self.next = reject["jump"]
 
     def resolve(self):
+        resolve = None
         if 'resolve' in self.config:
             resolve = self.config["resolve"]
         if resolve is not None:
@@ -178,35 +185,36 @@ class Item(Utils):
                     self.next = resolve["jump"]
 
     def click(self):
-        click = self.config["click"]
-        if self.position is not None and click is not None:
-            left_top, right_bottom = self.position
-            x1, y1 = left_top
-            x2, y2 = right_bottom
-            base = (x1+int((x2 - x1)/2), y1+int((y2-y1)/2))
-            if "positionBase" in click:
-                match click["positionBase"]:
-                    case 'leftTop':
-                        base = left_top
-                    case 'rightTop':
-                        base = (x2, y1)
-                    case 'leftBottom':
-                        base = (x1, y2)
-                    case 'rightBottom':
-                        base = right_bottom
-                    case 'center':
-                        base = (x1+int((x2 - x1)/2), y1+int((y2-y1)/2))
-            if "offset" in click:
-                x, y = click["offset"]
-                x0, y0 = base
-                base = (x0+x, y0+y)
-            if "random" in click and isinstance(click["random"], int):
-                randomx = random.randint(-click["random"], click["random"])
-                randomy = random.randint(-click["random"], click["random"])
+        if 'click' in self.config:
+            click = self.config["click"]
+            if self.position is not None and click is not None:
+                left_top, right_bottom = self.position
+                x1, y1 = left_top
+                x2, y2 = right_bottom
+                base = (x1+int((x2 - x1)/2), y1+int((y2-y1)/2))
+                if "positionBase" in click:
+                    match click["positionBase"]:
+                        case 'leftTop':
+                            base = left_top
+                        case 'rightTop':
+                            base = (x2, y1)
+                        case 'leftBottom':
+                            base = (x1, y2)
+                        case 'rightBottom':
+                            base = right_bottom
+                        case 'center':
+                            base = (x1+int((x2 - x1)/2), y1+int((y2-y1)/2))
+                if "offset" in click:
+                    x, y = click["offset"]
+                    x0, y0 = base
+                    base = (x0+x, y0+y)
+                if "random" in click and isinstance(click["random"], int):
+                    randomx = random.randint(-click["random"], click["random"])
+                    randomy = random.randint(-click["random"], click["random"])
+                    x, y = base
+                    base = (x+randomx, y+randomy)
                 x, y = base
-                base = (x+randomx, y+randomy)
-            x, y = base
-            self.do_click(self.hwnd, x, y)
+                self.do_click(self.hwnd, x, y)
 
 
 class Config:

@@ -35,6 +35,8 @@
       "reject": { 
         //失败后且重试完后跳转到哪个tag
         "jump": "example", 
+        //大于0则开启随机sleep
+        "sleepRandom": 0.5,
         //睡眠秒数
         "sleep": 0,
         //如果匹配失败重试次数
@@ -58,10 +60,14 @@
         //基于positionBase 再偏移 [x,y]像素
         "offset": [0, 0],
         // 基于positionBase和offset计算后的点为圆心 random为半径画圆 点击随机落在圆形区域内
-        "random": 10
+        "random": 10,
+        //实现拖拽
+        "moveTo": [0,0]
       },
       //暂定指定秒数之后执行next
       "sleep": 4,
+      //大于0则开启随机sleep
+      "sleepRandom": 0.5,
       //指定除了执行jump外正常的流程下一个tag
       "next": "tag" 
     }
