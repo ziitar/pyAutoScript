@@ -55,6 +55,8 @@
       },
       //点击配置
       "click": {
+        //如果提供了position 且没有图像识别， 则使用这个坐标
+        "position": [0,0],
         //识别后点击坐标位于识别区域的那里 默认center 可以输入 （leftTop, rightTop, leftBottom, rightBottom, center）
         "positionBase": "center", 
         //基于positionBase 再偏移 [x,y]像素
@@ -62,7 +64,7 @@
         // 基于positionBase和offset计算后的点为圆心 random为半径画圆 点击随机落在圆形区域内
         "random": 10,
         //实现拖拽
-        "moveTo": [0,0],
+        "movePath": [["+100", "-100"],[0,0]],
       },
       //暂定指定秒数之后执行next
       "sleep": 4,

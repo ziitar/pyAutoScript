@@ -23,6 +23,7 @@ class Item(Utils):
         self.global_data = global_data
         self.run_num = 0
         self.next = None
+        self.position = None
         if 'next' in item_config:
             self.next = item_config['next']
         if 'debug' in item_config:
@@ -149,7 +150,8 @@ class Item(Utils):
         if 'reject' in self.config and self.config["reject"] is not None:
             reject = self.config["reject"]
             if 'sleepRandom' in reject and isinstance(reject['sleepRandom'], float):
-                time.sleep(random.random(0, reject['sleepRandom']))
+                time.sleep(random.randrange(
+                    0, reject['sleepRandom'] * 1000)/1000)
             if 'sleep' in reject and isinstance(reject['sleep'], int):
                 time.sleep(reject['sleep'])
             if "retry" in reject and reject["retry"] is not None and self.run_num < reject["retry"]:
@@ -187,37 +189,42 @@ class Item(Utils):
     def click(self):
         if 'click' in self.config:
             click = self.config["click"]
-            if self.position is not None and click is not None:
-                left_top, right_bottom = self.position
-                x1, y1 = left_top
-                x2, y2 = right_bottom
-                base = (x1+int((x2 - x1)/2), y1+int((y2-y1)/2))
-                if "positionBase" in click:
-                    match click["positionBase"]:
-                        case 'leftTop':
-                            base = left_top
-                        case 'rightTop':
-                            base = (x2, y1)
-                        case 'leftBottom':
-                            base = (x1, y2)
-                        case 'rightBottom':
-                            base = right_bottom
-                        case 'center':
-                            base = (x1+int((x2 - x1)/2), y1+int((y2-y1)/2))
-                if "offset" in click:
-                    x, y = click["offset"]
-                    x0, y0 = base
-                    base = (x0+x, y0+y)
-                if "random" in click and isinstance(click["random"], int):
-                    randomx = random.randint(-click["random"], click["random"])
-                    randomy = random.randint(-click["random"], click["random"])
-                    x, y = base
-                    base = (x+randomx, y+randomy)
-                x, y = base
-                moveTo = None
-                if 'moveTo' in click and isinstance(click['moveTo'], list):
-                    moveTo = click['moveTo']
-                self.do_click(self.hwnd, (x, y), moveTo)
+            if self.position is not None:
+                self._clickCalc(click, self.position)
+            elif "position" in click:
+                self._clickCalc(click, (click['position'], click['position']))
+
+    def _clickCalc(self, click, position):
+        left_top, right_bottom = position
+        x1, y1 = left_top
+        x2, y2 = right_bottom
+        base = (x1+int((x2 - x1)/2), y1+int((y2-y1)/2))
+        if "positionBase" in click:
+            match click["positionBase"]:
+                case 'leftTop':
+                    base = left_top
+                case 'rightTop':
+                    base = (x2, y1)
+                case 'leftBottom':
+                    base = (x1, y2)
+                case 'rightBottom':
+                    base = right_bottom
+                case 'center':
+                    base = (x1+int((x2 - x1)/2), y1+int((y2-y1)/2))
+        if "offset" in click:
+            x, y = click["offset"]
+            x0, y0 = base
+            base = (x0+x, y0+y)
+        if "random" in click and isinstance(click["random"], int):
+            randomx = random.randint(-click["random"], click["random"])
+            randomy = random.randint(-click["random"], click["random"])
+            x, y = base
+            base = (x+randomx, y+randomy)
+        x, y = base
+        movePath = None
+        if 'movePath' in click and isinstance(click['movePath'], list):
+            movePath = click['movePath']
+        self.do_click(self.hwnd, (x, y), movePath)
 
 
 class Config:

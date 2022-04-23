@@ -57,7 +57,8 @@ class Process():
         if "sleep" in itemConfig is not None and isinstance(itemConfig["sleep"], int):
             time.sleep(itemConfig["sleep"])
         if 'sleepRandom' in itemConfig and isinstance(itemConfig['sleepRandom'], float):
-            time.sleep(random.random(0, itemConfig['sleepRandom']))
+            time.sleep(random.randrange(
+                0, itemConfig['sleepRandom'] * 1000)/1000)
         if item.next is not None:
             while item.next is not None:
                 tag = item.next
