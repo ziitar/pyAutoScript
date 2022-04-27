@@ -190,7 +190,18 @@ class Item(Utils):
         if 'click' in self.config:
             click = self.config["click"]
             if self.position is not None:
-                self._clickCalc(click, self.position)
+                if isinstance(self.position, list):
+                    if 'targetClick' in click and isinstance(click['targetClick'], list):
+                        for index in click['targetClick']:
+                            if self.position[index] is not None:
+                                self._clickCalc(click, self.position[index])
+                                time.sleep(0.2)
+                    else:
+                        for position in self.position:
+                            self._clickCalc(click, position)
+                            time.sleep(0.2)
+                else:
+                    self._clickCalc(click, self.position)
             elif "position" in click:
                 self._clickCalc(click, (click['position'], click['position']))
 

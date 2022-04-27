@@ -93,7 +93,7 @@ class Utils:
                 loc = np.where(res <= rate)
             else:
                 loc = np.where(res >= rate)
-            # todo 识别多对象时
+            return [(pt, (pt[0] + width, pt[1] + height)) for pt in zip(*loc[::-1])][0:num]
 
     def do_click(self, hwnd, start, movePath):
         """

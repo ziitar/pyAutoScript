@@ -57,6 +57,8 @@
       "click": {
         //如果提供了position 且没有图像识别， 则使用这个坐标
         "position": [0,0],
+        //如果match的targetNum大于1 则targetClick生效 却点击输入的索引,如果此索引没有匹配到则不执行点击,不配置则点击全部
+        "targetClick": [0],
         //识别后点击坐标位于识别区域的那里 默认center 可以输入 （leftTop, rightTop, leftBottom, rightBottom, center）
         "positionBase": "center", 
         //基于positionBase 再偏移 [x,y]像素
