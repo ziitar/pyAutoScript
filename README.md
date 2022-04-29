@@ -1,7 +1,7 @@
 # python自动脚本
 [![pyAutoScript](https://img.shields.io/badge/python-v3.x-blue)](https://github.com/ziitar/pyAutoScript) ![windows only](https://img.shields.io/badge/platform-windows-blue)
 
-一个使用json配置自定义在window程序点击/滑动操作流程的python脚本。可以用于制作游戏脚本、连点器、抢购或其他需要重复的操作的批处理脚本。（部分windows程序可能截图黑屏导致图像无法识别）
+一个使用json配置自定义在window程序点击/滑动操作流程的python脚本。可以用于制作游戏脚本、连点器、抢购或其他需要重复的操作的批处理脚本。
 
 ## 内容列表
 
@@ -94,10 +94,11 @@ config/config.json:
 
 ## 接下来需要做
 
-- [ ] match.sample支持数组
-- [ ] 当match.sample为数组是提供或、且判定
+- [x] match.sample支持数组
+- [x] 当match.sample为数组时提供或、且判定
 - [x] 支持拖动操作
 - [x] 拖动支持ease-in-out，模拟人手动拖动
+- [x] 支持兼容模式截图-需要置顶程序窗口
 - [ ] 支持键盘按键
 - [ ] 支持文本输入
 - [ ] 支持特征值图像匹配

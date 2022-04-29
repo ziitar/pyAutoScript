@@ -7,6 +7,8 @@
       "debug": false, 
       //图像识别配置
       "match": {   
+        //是否兼容截图 默认为false
+        "compatible": false,
         //识别方法
         "method": "TM_SQDIFF_NORMED", 
         //需匹配的图像url 如果为数组 则只需其中一个匹配 
@@ -15,6 +17,8 @@
         "targetNum": 1, 
         //相识概率
         "rate": 0.9,
+        //当sample为数组时 各项匹配结果之间的关系 （and 且，or 或）判定后为match的True/False结果
+        "relation": "and",
         //匹配结果标识(false,true)保存到全局指定字段
         "saveAs": "property"
       },

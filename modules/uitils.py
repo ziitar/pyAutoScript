@@ -2,11 +2,13 @@
 import random
 import win32api
 import win32con
+import win32gui
 from PyQt5.QtWidgets import QApplication
 import cv2 as cv
 import numpy as np
 import os
 import time
+from PIL import Image as ImageGrab
 
 
 script_dir = os.path.dirname(__file__)
@@ -35,6 +37,19 @@ class Utils:
         ptr.setsize(img.byteCount())
         img = np.array(ptr).reshape(img.height(), img.width(), 4)
         return img
+
+    def force_screenshot(self, hwnd):
+        """
+        PIL截图方法，不能被遮挡
+        :param hwnd: 目标窗口句柄
+        :return: 截图
+        """
+        win32gui.SetForegroundWindow(hwnd)  # 窗口置顶
+        time.sleep(0.2)  # 置顶后等0.2秒再截图
+        x1, y1, x2, y2 = win32gui.GetWindowRect(hwnd)  # 获取窗口坐标
+        grab_image = ImageGrab.grab((x1, y1, x2, y2))  # 用PIL方法截图
+        im_cv2 = np.array(grab_image)  # 转换为cv2的矩阵格式
+        return im_cv2
 
     def threshold_image(self, image):
         """

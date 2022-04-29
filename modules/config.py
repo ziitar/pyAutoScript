@@ -126,24 +126,59 @@ class Item(Utils):
 
     def match_img(self):
         if 'match' in self.config and 'sample' in self.config['match'] and self.config["match"]["sample"] is not None:
-            source = self.background_screenshot(self.hwnd)
-            sample_url = os.path.join(img_dir, self.config["match"]["sample"])
-            sample = cv.imread(sample_url)
-            rate = 0.1 if self.match_template_method in [
-                cv.TM_SQDIFF, cv.TM_SQDIFF_NORMED] else 0.8
-            if 'rete' in self.config["match"]:
-                rate = float(self.config["match"]['rate'])
-            if 'targetNum' in self.config['match']:
-                targetNum = self.config["match"]['targetNum']
-            result = self.template_matching(sample, source, rate, targetNum)
-            if "saveAs" in self.config["match"]:
-                self.global_data[self.config["match"]["saveAs"]
-                                 ] = True if result is not None else False
-            if result is not None:
-                self.position = result
-                return True
+            if 'compatible' in self.config['match'] and self.config['match']['compatible'] is True:
+                source = self.force_screenshot(self.hwnd)
             else:
-                return False
+                source = self.background_screenshot(self.hwnd)
+            if isinstance(self.config['match']['sample'], list):
+                results = []
+                for sampleUrlStr in self.config["match"]["sample"]:
+                    sample_url = os.path.join(
+                        img_dir, sampleUrlStr)
+                    sample = cv.imread(sample_url)
+                    rate = 0.1 if self.match_template_method in [
+                        cv.TM_SQDIFF, cv.TM_SQDIFF_NORMED] else 0.8
+                    if 'rete' in self.config["match"]:
+                        rate = float(self.config["match"]['rate'])
+                    if 'targetNum' in self.config['match']:
+                        targetNum = self.config["match"]['targetNum']
+                    result = self.template_matching(
+                        sample, source, rate, targetNum)
+                    if "saveAs" in self.config["match"]:
+                        self.global_data[self.config["match"]["saveAs"]
+                                         ] = True if result is not None else False
+                    if result is not None:
+                        results.append(result)
+                    else:
+                        results.append(None)
+                self.position = results
+                if 'relation' in self.config['match']:
+                    if self.config['match']['relation'] == 'or':
+                        return any([x is not None for x in results])
+                    else:
+                        return all([x is not None for x in results])
+                else:
+                    return all([x is not None for x in results])
+            else:
+                sample_url = os.path.join(
+                    img_dir, self.config["match"]["sample"])
+                sample = cv.imread(sample_url)
+                rate = 0.1 if self.match_template_method in [
+                    cv.TM_SQDIFF, cv.TM_SQDIFF_NORMED] else 0.8
+                if 'rete' in self.config["match"]:
+                    rate = float(self.config["match"]['rate'])
+                if 'targetNum' in self.config['match']:
+                    targetNum = self.config["match"]['targetNum']
+                result = self.template_matching(
+                    sample, source, rate, targetNum)
+                if "saveAs" in self.config["match"]:
+                    self.global_data[self.config["match"]["saveAs"]
+                                     ] = True if result is not None else False
+                if result is not None:
+                    self.position = result
+                    return True
+                else:
+                    return False
         return True
 
     def reject(self):
